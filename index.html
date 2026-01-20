@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Stunt Height Checker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+        }
+        
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #111827;
+        }
+        
+        .header {
+            background: #1f2937;
+            padding: 16px;
+        }
+        
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .header-title h1 {
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .icon {
+            width: 24px;
+            height: 24px;
+            color: #60a5fa;
+        }
+        
+        .btn-info {
+            background: transparent;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            padding: 4px;
+        }
+        
+        .btn-info:hover {
+            color: white;
+        }
+        
+        .info-box {
+            background: #374151;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #e5e7eb;
+        }
+        
+        .info-box p {
+            margin-bottom: 8px;
+        }
+        
+        .info-box p:last-child {
+            margin-bottom: 0;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+        
+        .video-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            background: black;
+        }
+        
+        video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center center;
+            object-fit: contain;
+            transition: none;
+        }
+        
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: crosshair;
+            touch-action: none;
+        }
+        
+        .upload-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            z-index: 10;
+        }
+        
+        .upload-overlay svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .btn-upload {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 16px;
+        }
+        
+        .btn-upload:hover {
+            background: #1d4ed8;
+        }
+        
+        .controls {
+            background: #1f2937;
+            padding: 16px;
+        }
+        
+        .video-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .btn-play {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-play:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-play svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .btn-frame {
+            background: #374151;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .btn-frame:hover {
+            background: #4b5563;
+        }
+        
+        .btn-frame:active {
+            background: #1f2937;
+        }
+        
+        .btn-frame svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .frame-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .playback-speed {
+            color: #9ca3af;
+            font-size: 12px;
+            background: #374151;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .playback-speed:hover {
+            background: #4b5563;
+        }
+        
+        .zoom-controls {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 5;
+        }
+        
+        .btn-zoom {
+            background: rgba(31, 41, 55, 0.9);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+        
+        .btn-zoom:active {
+            background: rgba(55, 65, 81, 0.9);
+        }
+        
+        .btn-zoom svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .pan-controls {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            z-index: 5;
+        }
+        
+        .btn-pan {
+            background: rgba(31, 41, 55, 0.9);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+            width: 48px;
+            height: 48px;
+        }
+        
+        .btn-pan:active {
+            background: rgba(55, 65, 81, 0.9);
+        }
+        
+        .btn-pan svg {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .btn-pan.center {
+            grid-column: 2;
+            grid-row: 2;
+        }
+        
+        .time-display {
+            color: #9ca3af;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        
+        .slider-container {
+            flex: 1;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #374151;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #2563eb;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .instruction {
+            color: white;
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+        
+        .status-box {
+            text-align: center;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .status-valid {
+            background: #16a34a;
+        }
+        
+        .status-invalid {
+            background: #dc2626;
+        }
+        
+        .status-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }
+        
+        .status-title {
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .status-text {
+            color: white;
+            font-size: 14px;
+        }
+        
+        .btn-reset {
+            width: 100%;
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+        
+        .btn-reset:hover {
+            background: #1d4ed8;
+        }
+        
+        .help-text {
+            color: #9ca3af;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <div class="header-title">
+                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    </svg>
+                    <h1>Stunt Height Checker</h1>
+                </div>
+                <button class="btn-info" id="infoBtn">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="info-box hidden" id="infoBox">
+                <p><strong>How to use:</strong></p>
+                <p>1. Upload a video of a stunt</p>
+                <p>2. Tap on the thrower's eyes</p>
+                <p>3. Tap on the flyer's toes</p>
+                <p>4. Use play controls to watch - lines update in real-time</p>
+                <p>Green = Valid (toes above eyes) | Red = Invalid (toes below eyes)</p>
+            </div>
+        </div>
+
+        <div class="video-container">
+            <div class="upload-overlay" id="uploadOverlay">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                </svg>
+                <div>
+                    <p style="font-size: 18px; margin-bottom: 8px;">Upload a video to analyze</p>
+                    <p style="font-size: 14px; color: #9ca3af;">MP4, MOV, or other video formats</p>
+                    <button class="btn-upload" onclick="document.getElementById('fileInput').click()">
+                        Choose Video
+                    </button>
+                </div>
+            </div>
+            <div class="zoom-controls hidden" id="zoomControls">
+                <button class="btn-zoom" id="zoomInBtn" title="Zoom in">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7"></path>
+                    </svg>
+                </button>
+                <button class="btn-zoom" id="zoomOutBtn" title="Zoom out">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7"></path>
+                    </svg>
+                </button>
+                <button class="btn-zoom" id="resetZoomBtn" title="Reset zoom">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="pan-controls hidden" id="panControls">
+                <div style="grid-column: 2; grid-row: 1;">
+                    <button class="btn-pan" id="panUpBtn" title="Pan up">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div style="grid-column: 1; grid-row: 2;">
+                    <button class="btn-pan" id="panLeftBtn" title="Pan left">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div style="grid-column: 3; grid-row: 2;">
+                    <button class="btn-pan" id="panRightBtn" title="Pan right">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div style="grid-column: 2; grid-row: 3;">
+                    <button class="btn-pan" id="panDownBtn" title="Pan down">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <input type="file" id="fileInput" accept="video/*">
+            <video id="video"></video>
+            <canvas id="canvas"></canvas>
+        </div>
+
+        <div class="controls">
+            <div class="video-controls hidden" id="videoControls">
+                <button class="btn-play" id="playBtn">
+                    <svg id="playIcon" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"></path>
+                    </svg>
+                    <svg id="pauseIcon" class="hidden" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"></path>
+                    </svg>
+                    <span id="playText">Play</span>
+                </button>
+                <div class="frame-controls">
+                    <button class="btn-frame" id="prevFrameBtn" title="Previous frame">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
+                        </svg>
+                    </button>
+                    <button class="btn-frame" id="nextFrameBtn" title="Next frame">
+                        <svg fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+                        </svg>
+                    </button>
+                </div>
+                <span class="playback-speed" id="speedControl">1x</span>
+                <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
+                <div class="slider-container">
+                    <input type="range" id="seekBar" min="0" max="100" value="0" step="0.01">
+                </div>
+            </div>
+            
+            <div id="setupControls" class="hidden">
+                <p class="instruction" id="instruction">👁️ Tap on the <strong>thrower's eyes</strong></p>
+            </div>
+            
+            <div id="trackingControls" class="hidden">
+                <div id="statusBox" class="status-box status-valid">
+                    <div class="status-header">
+                        <span class="status-title" id="statusTitle">VALID STUNT</span>
+                    </div>
+                    <p class="status-text" id="statusText">Toes are above eye level</p>
+                </div>
+                <button class="btn-reset" id="resetBtn">Reset Tracking Points</button>
+                <p class="help-text">Drag the markers to adjust as the video plays</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const fileInput = document.getElementById('fileInput');
+        const uploadOverlay = document.getElementById('uploadOverlay');
+        const zoomControls = document.getElementById('zoomControls');
+        const zoomInBtn = document.getElementById('zoomInBtn');
+        const zoomOutBtn = document.getElementById('zoomOutBtn');
+        const resetZoomBtn = document.getElementById('resetZoomBtn');
+        const panControls = document.getElementById('panControls');
+        const panUpBtn = document.getElementById('panUpBtn');
+        const panDownBtn = document.getElementById('panDownBtn');
+        const panLeftBtn = document.getElementById('panLeftBtn');
+        const panRightBtn = document.getElementById('panRightBtn');
+        const infoBtn = document.getElementById('infoBtn');
+        const infoBox = document.getElementById('infoBox');
+        const playBtn = document.getElementById('playBtn');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const playText = document.getElementById('playText');
+        const prevFrameBtn = document.getElementById('prevFrameBtn');
+        const nextFrameBtn = document.getElementById('nextFrameBtn');
+        const speedControl = document.getElementById('speedControl');
+        const seekBar = document.getElementById('seekBar');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const videoControls = document.getElementById('videoControls');
+        const instruction = document.getElementById('instruction');
+        const setupControls = document.getElementById('setupControls');
+        const trackingControls = document.getElementById('trackingControls');
+        const statusBox = document.getElementById('statusBox');
+        const statusTitle = document.getElementById('statusTitle');
+        const statusText = document.getElementById('statusText');
+        const resetBtn = document.getElementById('resetBtn');
+
+        let mode = 'setup';
+        let tracking = { eyes: null, toes: null };
+        let isValid = null;
+        let videoLoaded = false;
+        let playbackSpeeds = [0.25, 0.5, 0.75, 1, 1.5, 2];
+        let currentSpeedIndex = 3; // 1x
+        let fps = 30; // Default, will be updated
+        
+        // Zoom and pan
+        let zoom = 1;
+        let panX = 0;
+        let panY = 0;
+        let isDraggingVideo = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let dragStartPanX = 0;
+        let dragStartPanY = 0;
+
+        // Load video file
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                video.src = url;
+                uploadOverlay.classList.add('hidden');
+                zoomControls.classList.remove('hidden');
+                videoControls.classList.remove('hidden');
+                setupControls.classList.remove('hidden');
+                videoLoaded = true;
+            }
+        });
+
+        // Video loaded
+        video.addEventListener('loadedmetadata', () => {
+            seekBar.max = video.duration;
+            updateTimeDisplay();
+            fps = 30;
+            updateVideoTransform();
+        });
+
+        // Zoom controls
+        function updateVideoTransform() {
+            video.style.width = (100 * zoom) + '%';
+            video.style.height = (100 * zoom) + '%';
+            video.style.transform = `translate(calc(-50% + ${panX}px), calc(-50% + ${panY}px))`;
+            
+            // Show/hide pan controls based on zoom
+            if (zoom > 1) {
+                panControls.classList.remove('hidden');
+            } else {
+                panControls.classList.add('hidden');
+            }
+        }
+
+        zoomInBtn.addEventListener('click', () => {
+            zoom = Math.min(zoom + 0.25, 4);
+            updateVideoTransform();
+        });
+
+        zoomOutBtn.addEventListener('click', () => {
+            zoom = Math.max(zoom - 0.25, 1);
+            if (zoom === 1) {
+                panX = 0;
+                panY = 0;
+            }
+            updateVideoTransform();
+        });
+
+        resetZoomBtn.addEventListener('click', () => {
+            zoom = 1;
+            panX = 0;
+            panY = 0;
+            updateVideoTransform();
+        });
+
+        // Pan controls
+        const panStep = 50;
+        
+        panUpBtn.addEventListener('click', () => {
+            panY += panStep;
+            updateVideoTransform();
+        });
+        
+        panDownBtn.addEventListener('click', () => {
+            panY -= panStep;
+            updateVideoTransform();
+        });
+        
+        panLeftBtn.addEventListener('click', () => {
+            panX += panStep;
+            updateVideoTransform();
+        });
+        
+        panRightBtn.addEventListener('click', () => {
+            panX -= panStep;
+            updateVideoTransform();
+        });
+
+        // Pinch to zoom
+        let touchStartDistance = 0;
+        let touchStartZoom = 1;
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                touchStartDistance = Math.hypot(
+                    touch2.clientX - touch1.clientX,
+                    touch2.clientY - touch1.clientY
+                );
+                touchStartZoom = zoom;
+            }
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                const currentDistance = Math.hypot(
+                    touch2.clientX - touch1.clientX,
+                    touch2.clientY - touch1.clientY
+                );
+                
+                if (touchStartDistance > 0) {
+                    const scale = currentDistance / touchStartDistance;
+                    zoom = Math.max(1, Math.min(4, touchStartZoom * scale));
+                    if (zoom === 1) {
+                        panX = 0;
+                        panY = 0;
+                    }
+                    updateVideoTransform();
+                }
+                return;
+            }
+        });
+
+        // Frame-by-frame navigation
+        prevFrameBtn.addEventListener('click', () => {
+            video.pause();
+            playIcon.classList.remove('hidden');
+            pauseIcon.classList.add('hidden');
+            playText.textContent = 'Play';
+            
+            const frameTime = 1 / fps;
+            video.currentTime = Math.max(0, video.currentTime - frameTime);
+        });
+
+        nextFrameBtn.addEventListener('click', () => {
+            video.pause();
+            playIcon.classList.remove('hidden');
+            pauseIcon.classList.add('hidden');
+            playText.textContent = 'Play';
+            
+            const frameTime = 1 / fps;
+            video.currentTime = Math.min(video.duration, video.currentTime + frameTime);
+        });
+
+        // Playback speed control
+        speedControl.addEventListener('click', () => {
+            currentSpeedIndex = (currentSpeedIndex + 1) % playbackSpeeds.length;
+            const speed = playbackSpeeds[currentSpeedIndex];
+            video.playbackRate = speed;
+            speedControl.textContent = speed + 'x';
+        });
+
+        // Play/Pause
+        playBtn.addEventListener('click', () => {
+            if (video.paused) {
+                video.play();
+                playIcon.classList.add('hidden');
+                pauseIcon.classList.remove('hidden');
+                playText.textContent = 'Pause';
+            } else {
+                video.pause();
+                playIcon.classList.remove('hidden');
+                pauseIcon.classList.add('hidden');
+                playText.textContent = 'Play';
+            }
+        });
+
+        // Update time display
+        function updateTimeDisplay() {
+            const current = formatTime(video.currentTime);
+            const duration = formatTime(video.duration);
+            timeDisplay.textContent = `${current} / ${duration}`;
+        }
+
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        // Seek bar
+        video.addEventListener('timeupdate', () => {
+            if (!seekBar.dragging) {
+                seekBar.value = video.currentTime;
+            }
+            updateTimeDisplay();
+        });
+
+        let seekBarDragging = false;
+        seekBar.addEventListener('mousedown', () => { seekBarDragging = true; });
+        seekBar.addEventListener('touchstart', () => { seekBarDragging = true; });
+        seekBar.addEventListener('mouseup', () => { seekBarDragging = false; });
+        seekBar.addEventListener('touchend', () => { seekBarDragging = false; });
+
+        seekBar.addEventListener('input', () => {
+            video.currentTime = seekBar.value;
+        });
+
+        // Handle touch/click
+        function handleTouch(e) {
+            if (!videoLoaded) return;
+            
+            // Ignore multi-touch (used for pinch zoom)
+            if (e.touches && e.touches.length > 1) return;
+            
+            e.preventDefault();
+            
+            const rect = canvas.getBoundingClientRect();
+            const touch = e.touches ? e.touches[0] : e;
+            const clientX = touch.clientX - rect.left;
+            const clientY = touch.clientY - rect.top;
+            
+            // Check if clicking near existing markers (for dragging them)
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const canvasX = clientX * scaleX;
+            const canvasY = clientY * scaleY;
+            
+            if (mode === 'tracking') {
+                const distToEyes = tracking.eyes ? 
+                    Math.hypot(canvasX - tracking.eyes.x, canvasY - tracking.eyes.y) : Infinity;
+                const distToToes = tracking.toes ? 
+                    Math.hypot(canvasX - tracking.toes.x, canvasY - tracking.toes.y) : Infinity;
+                
+                // If close to a marker, we're dragging the marker
+                if (distToEyes < 100 || distToToes < 100) {
+                    return; // Let handleMove take care of this
+                }
+                
+                // Otherwise, if zoomed in, start dragging the video
+                if (zoom > 1) {
+                    isDraggingVideo = true;
+                    dragStartX = clientX;
+                    dragStartY = clientY;
+                    dragStartPanX = panX;
+                    dragStartPanY = panY;
+                    return;
+                }
+            }
+
+            if (mode === 'setup') {
+                const x = canvasX;
+                const y = canvasY;
+                
+                if (!tracking.eyes) {
+                    tracking.eyes = { x, y };
+                    instruction.innerHTML = '🦶 Tap on the <strong>flyer\'s toes</strong>';
+                } else if (!tracking.toes) {
+                    tracking.toes = { x, y };
+                    mode = 'tracking';
+                    setupControls.classList.add('hidden');
+                    trackingControls.classList.remove('hidden');
+                }
+            }
+        }
+
+        function handleMove(e) {
+            if (mode !== 'tracking') return;
+            
+            // Ignore multi-touch
+            if (e.touches && e.touches.length > 1) return;
+            
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            const touch = e.touches ? e.touches[0] : e;
+            const x = (touch.clientX - rect.left) * scaleX;
+            const y = (touch.clientY - rect.top) * scaleY;
+
+            const distToEyes = tracking.eyes ? 
+                Math.hypot(x - tracking.eyes.x, y - tracking.eyes.y) : Infinity;
+            const distToToes = tracking.toes ? 
+                Math.hypot(x - tracking.toes.x, y - tracking.toes.y) : Infinity;
+
+            if (distToEyes < 100 && distToEyes < distToToes) {
+                tracking.eyes.x = x;
+                tracking.eyes.y = y;
+            } else if (distToToes < 100) {
+                tracking.toes.x = x;
+                tracking.toes.y = y;
+            }
+        }
+
+        function handleTouchEnd() {
+            isDraggingVideo = false;
+        }
+
+        function reset() {
+            tracking = { eyes: null, toes: null };
+            mode = 'setup';
+            isValid = null;
+            zoom = 1;
+            panX = 0;
+            panY = 0;
+            updateVideoTransform();
+            setupControls.classList.remove('hidden');
+            trackingControls.classList.add('hidden');
+            instruction.innerHTML = '👁️ Tap on the <strong>thrower\'s eyes</strong>';
+        }
+
+        function draw() {
+            if (video.readyState >= 2) {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                // Scale drawing elements based on canvas width
+                const lineWidth = Math.max(3, canvas.width * 0.004);
+                const markerRadius = Math.max(12, canvas.width * 0.012);
+                const markerBorder = Math.max(2, canvas.width * 0.002);
+                const fontSize = Math.max(16, canvas.width * 0.018);
+                const labelOffset = Math.max(20, canvas.width * 0.02);
+                // const dashPattern = [Math.max(8, canvas.width * 0.008), Math.max(4, canvas.width * 0.004)];
+                const dashPattern = [0,0];
+                
+                const { eyes, toes } = tracking;
+                
+                if (eyes && toes) {
+                    const toesAboveEyes = toes.y < eyes.y;
+                    isValid = toesAboveEyes;
+                    
+                    const statusColor = toesAboveEyes ? '#22c55e' : '#ef4444';
+                    
+                    // Update status UI
+                    if (toesAboveEyes) {
+                        statusBox.className = 'status-box status-valid';
+                        statusTitle.textContent = 'VALID STUNT';
+                        statusText.textContent = 'Toes are above eye level';
+                    } else {
+                        statusBox.className = 'status-box status-invalid';
+                        statusTitle.textContent = 'INVALID';
+                        statusText.textContent = 'Toes dropped below eye level';
+                    }
+                    
+                    // Draw eye line
+                    ctx.strokeStyle = '#3b82f6';
+                    ctx.lineWidth = lineWidth;
+                    ctx.setLineDash(dashPattern);
+                    ctx.beginPath();
+                    ctx.moveTo(0, eyes.y);
+                    ctx.lineTo(canvas.width, eyes.y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    
+                    // Draw toe line
+                    ctx.strokeStyle = statusColor;
+                    ctx.lineWidth = lineWidth;
+                    ctx.setLineDash(dashPattern);
+                    ctx.beginPath();
+                    ctx.moveTo(0, toes.y);
+                    ctx.lineTo(canvas.width, toes.y);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    
+                    // Draw eye marker
+                    ctx.fillStyle = '#3b82f6';
+                    ctx.beginPath();
+                    ctx.arc(eyes.x, eyes.y, markerRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = markerBorder;
+                    ctx.stroke();
+                    
+                    // Draw toe marker
+                    ctx.fillStyle = statusColor;
+                    ctx.beginPath();
+                    ctx.arc(toes.x, toes.y, markerRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = markerBorder;
+                    ctx.stroke();
+                    
+                    // Draw labels
+                    ctx.fillStyle = 'white';
+                    ctx.font = `bold ${fontSize}px sans-serif`;
+                    ctx.strokeStyle = 'black';
+                    ctx.lineWidth = Math.max(3, fontSize * 0.15);
+                    ctx.strokeText('EYES', eyes.x + labelOffset, eyes.y + fontSize * 0.3);
+                    ctx.fillText('EYES', eyes.x + labelOffset, eyes.y + fontSize * 0.3);
+                    ctx.strokeText('TOES', toes.x + labelOffset, toes.y + fontSize * 0.3);
+                    ctx.fillText('TOES', toes.x + labelOffset, toes.y + fontSize * 0.3);
+                    
+                    // Status overlay
+                    if (!toesAboveEyes) {
+                        ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    } else {
+                        ctx.fillStyle = 'rgba(34, 197, 94, 0.15)';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    }
+                    
+                } else if (eyes) {
+                    // Draw only eye marker during setup
+                    ctx.fillStyle = '#3b82f6';
+                    ctx.beginPath();
+                    ctx.arc(eyes.x, eyes.y, markerRadius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = markerBorder;
+                    ctx.stroke();
+                    
+                    ctx.fillStyle = 'white';
+                    ctx.font = `bold ${fontSize}px sans-serif`;
+                    ctx.strokeStyle = 'black';
+                    ctx.lineWidth = Math.max(3, fontSize * 0.15);
+                    ctx.strokeText('EYES', eyes.x + labelOffset, eyes.y + fontSize * 0.3);
+                    ctx.fillText('EYES', eyes.x + labelOffset, eyes.y + fontSize * 0.3);
+                }
+            }
+            requestAnimationFrame(draw);
+        }
+
+        // Event listeners
+        canvas.addEventListener('touchstart', handleTouch);
+        canvas.addEventListener('touchmove', handleMove);
+        canvas.addEventListener('touchend', handleTouchEnd);
+        canvas.addEventListener('mousedown', handleTouch);
+        canvas.addEventListener('mousemove', (e) => {
+            if (e.buttons === 1) handleMove(e);
+        });
+        canvas.addEventListener('mouseup', handleTouchEnd);
+        
+        infoBtn.addEventListener('click', () => {
+            infoBox.classList.toggle('hidden');
+        });
+        
+        resetBtn.addEventListener('click', reset);
+
+        // Start
+        draw();
+    </script>
+</body>
+</html>
