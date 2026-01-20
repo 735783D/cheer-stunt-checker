@@ -428,7 +428,7 @@
             <div class="info-box hidden" id="infoBox">
                 <p><strong>How to use:</strong></p>
                 <p>1. Upload a video of a stunt</p>
-                <p>2. Tap on the thrower's eyes</p>
+                <p>2. Tap on the base's eyes</p>
                 <p>3. Tap on the flyer's toes</p>
                 <p>4. Use play controls to watch - lines update in real-time</p>
                 <p>Green = Valid (toes above eyes) | Red = Invalid (toes below eyes)</p>
@@ -531,7 +531,7 @@
             </div>
             
             <div id="setupControls" class="hidden">
-                <p class="instruction" id="instruction">👁️ Tap on the <strong>thrower's eyes</strong></p>
+                <p class="instruction" id="instruction">👁️ Tap on the <strong>base's eyes</strong></p>
             </div>
             
             <div id="trackingControls" class="hidden">
@@ -897,7 +897,7 @@
             updateVideoTransform();
             setupControls.classList.remove('hidden');
             trackingControls.classList.add('hidden');
-            instruction.innerHTML = '👁️ Tap on the <strong>thrower\'s eyes</strong>';
+            instruction.innerHTML = '👁️ Tap on the <strong>base\'s eyes</strong>';
         }
 
         function draw() {
