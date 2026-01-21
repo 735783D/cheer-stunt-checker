@@ -41,6 +41,7 @@ This is client-side HTML/JavaScript that:
 3. **View Source Code**
    - Click on `index.html` in this repository
    - Review the code yourself
+   - Check file hash: 39B55C04ED3B74176092E681899B128E8552426E4F0013E7678F66B6C629ECA7
    - Compare with what's running in your browser (View Page Source)
 
 4. **Check File Integrity**
